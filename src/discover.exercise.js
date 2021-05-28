@@ -7,36 +7,25 @@ import {FaSearch, FaTimes} from 'react-icons/fa'
 import {Input, BookListUL, Spinner} from './components/lib'
 import {BookRow} from './components/book-row'
 import * as colors from './styles/colors'
-import {client} from './utils/api-client'
+import { client } from './utils/api-client'
+
+import { useAsync } from './utils/hooks';
 
 function DiscoverBooksScreen() {
-  const [status, setStatus] = React.useState('idle')
-  const [error, setError] = React.useState('idle')
-  const [data, setData] = React.useState({})
   const [query, setQuery] = React.useState('')
   const [queried, setQueried] = React.useState(false)
 
+  const { data, error, run, isLoading, isError, isSuccess } = useAsync()
+  
+
   React.useEffect(() => {
-    if (!queried) return setStatus('idle')
+    if (!queried) return 
 
     const endPoint = `books?query=${encodeURIComponent(query)}`
-    setStatus('loading')
 
-    client(endPoint)
-      .then(data => {
-        setStatus('success')
-        setData(data)
-      })
-      .catch(error => {
-        setError(error)
-        setStatus('error')
-      })
-  }, [queried, query])
+    run(client(endPoint))
 
-
-  const isLoading = status === 'loading'
-  const isSuccess = status === 'success'
-  const isError = status === 'error'
+  }, [queried, query, run])
 
   function handleSearchSubmit(event) {
     event.preventDefault()
@@ -66,14 +55,14 @@ function DiscoverBooksScreen() {
                 background: 'transparent',
               }}
             >
-              {isLoading && <Spinner />}
-              {status === 'idle' ||
-        
-                (       (isSuccess && <FaSearch aria-label="search" />))}
-              {/* {status === "idle" && <FaSearch aria-label="search" />} */}
-              {isError && (
+              {isLoading ? (
+                <Spinner />
+              ) : isError ? (
                 <FaTimes aria-label="error" css={{color: colors.danger}} />
+              ) : (
+                <FaSearch aria-label="search" />
               )}
+
             </button>
           </label>
         </Tooltip>
