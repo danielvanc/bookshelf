@@ -5,7 +5,13 @@ function client(endpoint, customConfig = {}) {
   }
   const fullURL = `${process.env.REACT_APP_API_URL}/${endpoint}`
 
-  const response = window.fetch(fullURL, config).then(res => res.json())
+  const response = window.fetch(fullURL, config).then(async res => {
+    const data = await res.json()
+
+    if (!res.ok) return Promise.reject(data)
+
+    return data
+  })
 
   return response
 }
