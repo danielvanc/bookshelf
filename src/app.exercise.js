@@ -3,7 +3,6 @@ import {jsx} from '@emotion/core'
 
 import * as React from 'react'
 import * as auth from 'auth-provider'
-
 import {BrowserRouter as Router} from 'react-router-dom'
 import {FullPageSpinner} from './components/lib'
 import * as colors from './styles/colors'
@@ -71,7 +70,6 @@ function App() {
 
   if (isSuccess) {
     const props = {user, login, register, logout}
-
     return user ? (
       <Router>
         <AuthenticatedApp {...props} />
