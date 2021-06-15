@@ -6,7 +6,7 @@ import debounceFn from 'debounce-fn'
 import {FaRegCalendarAlt} from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
 import {useParams} from 'react-router-dom'
-import {useQuery, useMutation, queryCache} from 'react-query'
+import {useMutation, queryCache} from 'react-query'
 import {client} from 'utils/api-client'
 import {useBook} from 'utils/books'
 import {formatDate} from 'utils/misc'
@@ -16,17 +16,14 @@ import {Textarea} from 'components/lib'
 import {Rating} from 'components/rating'
 import {StatusButtons} from 'components/status-buttons'
 
+import {useListItem} from 'utils/list-items'
+
 function BookScreen({user}) {
   const {bookId} = useParams()
 
   const book = useBook(bookId, user)
 
-  const {data: listItems} = useQuery({
-    queryKey: 'list-items',
-    queryFn: () =>
-      client(`list-items`, {token: user.token}).then(data => data.listItems),
-  })
-  const listItem = listItems?.find(li => li.bookId === bookId) ?? null
+  const listItem = useListItem(user, book.id)
 
   const {title, author, coverImageUrl, publisher, synopsis} = book
 
