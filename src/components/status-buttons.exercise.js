@@ -24,9 +24,11 @@ function TooltipButton({label, highlight, onClick, icon, ...rest}) {
   const {isLoading, isError, error, run, reset} = useAsync()
 
   function handleClick() {
-    if (isError) reset()
-
-    run(onClick())
+    if (isError) {
+      reset()
+    } else {
+      run(onClick())
+    }
   }
 
   return (
@@ -55,8 +57,6 @@ function TooltipButton({label, highlight, onClick, icon, ...rest}) {
 
 function StatusButtons({user, book}) {
   const listItem = useListItem(user, book.id)
-  const success = () => console.log('success')
-  const failure = () => console.log('failure')
   const throwError = {throwOnError: true}
   const [update] = useUpdateListItem(user, throwError)
   const [remove] = useRemoveListItem(user, throwError)
