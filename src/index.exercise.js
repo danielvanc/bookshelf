@@ -9,8 +9,11 @@ const queryConfig = {
   queries: {
     useErrorBoundary: true,
     refetchOnWindowFocus: false,
-    retry: (failureCount, error) =>
-      error.status === 404 || failureCount > 2 ? false : true,
+    retry(failureCount, error) {
+      if (error.status === 404) return false
+      else if (failureCount < 2) return true
+      else return false
+    },
   },
 }
 
