@@ -2,12 +2,12 @@
 import {jsx} from '@emotion/core'
 
 import * as React from 'react'
-import {useParams} from 'react-router-dom'
 import debounceFn from 'debounce-fn'
 import {FaRegCalendarAlt} from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
+import {useParams} from 'react-router-dom'
 import {useBook} from 'utils/books'
-import {useListItem, useUpdateListitem} from 'utils/list-items'
+import {useListItem, useUpdateListItem} from 'utils/list-items'
 import {formatDate} from 'utils/misc'
 import * as mq from 'styles/media-queries'
 import * as colors from 'styles/colors'
@@ -17,9 +17,7 @@ import {StatusButtons} from 'components/status-buttons'
 
 function BookScreen({user}) {
   const {bookId} = useParams()
-
   const book = useBook(bookId, user)
-
   const listItem = useListItem(user, bookId)
 
   const {title, author, coverImageUrl, publisher, synopsis} = book
@@ -104,11 +102,10 @@ function ListItemTimeframe({listItem}) {
 }
 
 function NotesTextarea({listItem, user}) {
-  const [mutate] = useUpdateListitem(user)
-  const debouncedMutate = React.useMemo(
-    () => debounceFn(mutate, {wait: 300}),
-    [mutate],
-  )
+  const [mutate] = useUpdateListItem(user)
+  const debouncedMutate = React.useMemo(() => debounceFn(mutate, {wait: 300}), [
+    mutate,
+  ])
 
   function handleNotesChange(e) {
     debouncedMutate({id: listItem.id, notes: e.target.value})
