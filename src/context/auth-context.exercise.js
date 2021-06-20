@@ -1,23 +1,12 @@
 /** @jsx jsx */
 import {jsx} from '@emotion/core'
 
-import React from 'react'
+import * as React from 'react'
 import {queryCache} from 'react-query'
 import * as auth from 'auth-provider'
-import {FullPageSpinner} from 'components/lib'
-import * as colors from 'styles/colors'
 import {client} from 'utils/api-client'
 import {useAsync} from 'utils/hooks'
-
-const AuthContext = React.createContext()
-AuthContext.displayName = 'AuthContext'
-function useAuth() {
-  const context = React.useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error(`useAuth must be used within an Auth Provider`)
-  }
-  return context
-}
+import {FullPageSpinner, FullPageErrorFallback} from 'components/lib'
 
 async function getUser() {
   let user = null
@@ -31,6 +20,9 @@ async function getUser() {
   return user
 }
 
+const AuthContext = React.createContext()
+AuthContext.displayName = 'AuthContext'
+
 function AuthProvider(props) {
   const {
     data: user,
@@ -41,6 +33,7 @@ function AuthProvider(props) {
     isSuccess,
     run,
     setData,
+    status,
   } = useAsync()
 
   React.useEffect(() => {
@@ -60,27 +53,23 @@ function AuthProvider(props) {
   }
 
   if (isError) {
-    return (
-      <div
-        css={{
-          color: colors.danger,
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <p>Uh oh... There's a problem. Try refreshing the app.</p>
-        <pre>{error.message}</pre>
-      </div>
-    )
+    return <FullPageErrorFallback error={error} />
   }
 
   if (isSuccess) {
     const value = {user, login, register, logout}
     return <AuthContext.Provider value={value} {...props} />
   }
+
+  throw new Error(`Unhandled status: ${status}`)
 }
 
-export {useAuth, AuthProvider}
+function useAuth() {
+  const context = React.useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error(`useAuth must be used within a AuthProvider`)
+  }
+  return context
+}
+
+export {AuthProvider, useAuth}
