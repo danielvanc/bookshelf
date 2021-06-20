@@ -72,4 +72,17 @@ function useAuth() {
   return context
 }
 
-export {AuthProvider, useAuth}
+// useClient is the authenticated client
+function useClient() {
+  const {
+    user: {token},
+  } = useAuth()
+  // Memoize this incase someone wants to use this function in a
+  // dependency list. Such as in the useRefetchBookSearchQuery of books.js
+  return React.useCallback(
+    (endpoint, config) => client(endpoint, {...config, token}),
+    [token],
+  )
+}
+
+export {AuthProvider, useAuth, useClient}
