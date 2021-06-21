@@ -1,7 +1,18 @@
+/** @jsx jsx */
+import {jsx} from '@emotion/core'
+
 import * as React from 'react'
 import {Dialog} from './lib'
 
 const ModalContext = React.createContext()
+
+function callAll(...fns) {
+  return (...args) => {
+    fns.forEach(fn => {
+      fn && fn(...args)
+    })
+  }
+}
 
 function Modal(props) {
   const [isOpen, setIsOpen] = React.useState(false)
@@ -9,23 +20,23 @@ function Modal(props) {
   return <ModalContext.Provider value={[isOpen, setIsOpen]} {...props} />
 }
 
-function ModalDismissButton({children: child}) {
+function ModalDismissButton({onClick, children: child}) {
   const [, setIsOpen] = React.useContext(ModalContext)
-
-  const dismiss = () => setIsOpen(false)
-
   return React.cloneElement(child, {
-    onClick: dismiss,
+    onClick: callAll(() => setIsOpen(false), child.props.onClick),
   })
 }
 
-function ModalOpenButton({children}) {
+function ModalOpenButton({onClick, children: child}) {
   const [, setIsOpen] = React.useContext(ModalContext)
-
-  const open = () => setIsOpen(true)
-
-  return React.cloneElement(children, {
-    onClick: open,
+  return React.cloneElement(child, {
+    onClick: callAll(() => setIsOpen(true), child.props.onClick),
+    // onClick: (...args) => {
+    //   setIsOpen(true)
+    //   if (child.props.onClick) {
+    //     child.props.onClick(...args)
+    //   }
+    // },
   })
 }
 

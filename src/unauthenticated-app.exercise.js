@@ -14,8 +14,8 @@ import {
 import {
   Modal,
   ModalDismissButton,
-  ModalOpenButton,
   ModalContents,
+  ModalOpenButton,
 } from './components/modal'
 import {Logo} from './components/logo'
 import {useAuth} from './context/auth-context'
@@ -72,37 +72,6 @@ function LoginForm({onSubmit, submitButton}) {
   )
 }
 
-// function LoginFormModal({
-//   onSubmit,
-//   modalTitleText,
-//   modalLabelText,
-//   submitButton,
-//   openButton,
-// }) {
-//   const [isOpen, setIsOpen] = React.useState(false)
-
-//   return (
-//     <React.Fragment>
-//       {React.cloneElement(openButton, {onClick: () => setIsOpen(true)})}
-//       <Dialog
-//         aria-label={modalLabelText}
-//         isOpen={isOpen}
-//         onDismiss={() => setIsOpen(false)}
-//       >
-//         <div css={{display: 'flex', justifyContent: 'flex-end'}}>
-//           {/* 💰 here's what you should put in your <ModalDismissButton> */}
-//           <CircleButton onClick={() => setIsOpen(false)}>
-//             <VisuallyHidden>Close</VisuallyHidden>
-//             <span aria-hidden>×</span>
-//           </CircleButton>
-//         </div>
-//         <h3 css={{textAlign: 'center', fontSize: '2em'}}>{modalTitleText}</h3>
-//         <LoginForm onSubmit={onSubmit} submitButton={submitButton} />
-//       </Dialog>
-//     </React.Fragment>
-//   )
-// }
-
 const circleDismissButton = (
   <div css={{display: 'flex', justifyContent: 'flex-end'}}>
     <ModalDismissButton>
@@ -138,7 +107,12 @@ function UnauthenticatedApp() {
       >
         <Modal>
           <ModalOpenButton>
-            <Button variant="primary">Login</Button>
+            <Button
+              onClick={() => console.log('opening the modal')}
+              variant="primary"
+            >
+              Login
+            </Button>
           </ModalOpenButton>
           <ModalContents aria-label="Login form">
             {circleDismissButton}
@@ -149,7 +123,6 @@ function UnauthenticatedApp() {
             />
           </ModalContents>
         </Modal>
-
         <Modal>
           <ModalOpenButton>
             <Button variant="secondary">Register</Button>
@@ -163,21 +136,6 @@ function UnauthenticatedApp() {
             />
           </ModalContents>
         </Modal>
-
-        {/* <LoginFormModal
-          onSubmit={login}
-          modalTitleText="Login"
-          modalLabelText="Login form"
-          submitButton={<Button variant="primary">Login</Button>}
-          openButton={<Button variant="primary">Login</Button>}
-        />
-        <LoginFormModal
-          onSubmit={register}
-          modalTitleText="Register"
-          modalLabelText="Registration form"
-          submitButton={<Button variant="secondary">Register</Button>}
-          openButton={<Button variant="secondary">Register</Button>}
-        /> */}
       </div>
     </div>
   )
