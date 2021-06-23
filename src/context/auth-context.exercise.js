@@ -41,11 +41,11 @@ function AuthProvider(props) {
   }, [run])
 
   const login = React.useCallback(
-    () => form => auth.login(form).then(user => setData(user)),
+    form => auth.login(form).then(user => setData(user)),
     [setData],
   )
   const register = React.useCallback(
-    () => form => auth.register(form).then(user => setData(user)),
+    form => auth.register(form).then(user => setData(user)),
     [setData],
   )
   const logout = React.useCallback(() => {
@@ -53,10 +53,12 @@ function AuthProvider(props) {
     setData(null)
   }, [setData])
 
-  const value = React.useMemo(
-    () => ({user, login, register, logout}),
-    [login, logout, register, user],
-  )
+  const value = React.useMemo(() => ({user, login, logout, register}), [
+    login,
+    logout,
+    register,
+    user,
+  ])
 
   if (isLoading || isIdle) {
     return <FullPageSpinner />
