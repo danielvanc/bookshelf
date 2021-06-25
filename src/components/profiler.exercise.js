@@ -27,7 +27,6 @@ function Profiler({metadata, phases, ...props}) {
     interactions,
   ) {
     if (!phases || phases.includes(phase)) {
-      console.log('hi')
       queue.push({
         metadata,
         id,
