@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import {jsx} from '@emotion/core'
 
-import {Profiler} from 'components/profiler'
 import {useListItems} from 'utils/list-items'
 import {BookListUL} from './lib'
 import {BookRow} from './book-row'
+import {Profiler} from './profiler'
 
 function ListItemList({filterListItems, noListItems, noFilteredListItems}) {
   const listItems = useListItems()
@@ -24,7 +24,7 @@ function ListItemList({filterListItems, noListItems, noFilteredListItems}) {
 
   return (
     <Profiler
-      id="list-item profile"
+      id="List Item List"
       metadata={{listItemCount: filteredListItems.length}}
     >
       <BookListUL>

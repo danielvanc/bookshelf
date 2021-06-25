@@ -5,7 +5,6 @@ import * as React from 'react'
 import debounceFn from 'debounce-fn'
 import {FaRegCalendarAlt} from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
-import {Profiler} from 'components/profiler'
 import {useParams} from 'react-router-dom'
 import {useBook} from 'utils/books'
 import {formatDate} from 'utils/misc'
@@ -14,6 +13,7 @@ import * as mq from 'styles/media-queries'
 import * as colors from 'styles/colors'
 import {Spinner, Textarea, ErrorMessage} from 'components/lib'
 import {Rating} from 'components/rating'
+import {Profiler} from 'components/profiler'
 import {StatusButtons} from 'components/status-buttons'
 
 function BookScreen() {
@@ -24,7 +24,7 @@ function BookScreen() {
   const {title, author, coverImageUrl, publisher, synopsis} = book
 
   return (
-    <Profiler id="Book screen" metadata={{bookId, listItemId: listItem?.id}}>
+    <Profiler id="Book Screen" metadata={{bookId, listItemId: listItem?.id}}>
       <div>
         <div
           css={{
@@ -104,10 +104,9 @@ function ListItemTimeframe({listItem}) {
 
 function NotesTextarea({listItem}) {
   const [mutate, {error, isError, isLoading}] = useUpdateListItem()
-  const debouncedMutate = React.useMemo(
-    () => debounceFn(mutate, {wait: 300}),
-    [mutate],
-  )
+  const debouncedMutate = React.useMemo(() => debounceFn(mutate, {wait: 300}), [
+    mutate,
+  ])
 
   function handleNotesChange(e) {
     debouncedMutate({id: listItem.id, notes: e.target.value})

@@ -3,12 +3,12 @@ import {jsx} from '@emotion/core'
 
 import * as React from 'react'
 import Tooltip from '@reach/tooltip'
-import {Profiler} from 'components/profiler'
 import {FaSearch, FaTimes} from 'react-icons/fa'
 import * as colors from 'styles/colors'
 import {useBookSearch, useRefetchBookSearchQuery} from 'utils/books'
 import {BookRow} from 'components/book-row'
 import {BookListUL, Spinner, Input} from 'components/lib'
+import {Profiler} from 'components/profiler'
 
 function DiscoverBooksScreen() {
   const [query, setQuery] = React.useState('')
@@ -86,7 +86,7 @@ function DiscoverBooksScreen() {
         )}
         {books.length ? (
           <Profiler
-            id="discover page profiler"
+            id="Discover Books Screen Book List"
             metadata={{query, bookCount: books.length}}
           >
             <BookListUL css={{marginTop: 20}}>
