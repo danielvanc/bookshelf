@@ -98,3 +98,15 @@ test('should automatically log out on 401 error', async () => {
   expect(queryCache.clear).toHaveBeenCalledTimes(1)
   expect(auth.logout).toHaveBeenCalledTimes(1)
 })
+
+test('correctly rejects the promise if there is an error', async () => {
+  const endpoint = 'test-endpoint'
+  const testMessage = {message: 'Test error'}
+  server.use(
+    rest.get(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+      return res(ctx.status(400), ctx.json(testMessage))
+    }),
+  )
+
+  await expect(client(endpoint)).rejects.toEqual(testMessage)
+})
