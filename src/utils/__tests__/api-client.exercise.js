@@ -1,14 +1,20 @@
-import {server, rest} from 'test/server/test-server'
-
+import {queryCache} from 'react-query'
+import * as auth from 'auth-provider'
+import {server, rest} from 'test/server'
 import {client} from '../api-client'
 
 const apiURL = process.env.REACT_APP_API_URL
 
+jest.mock('react-query')
+jest.mock('auth-provider')
+
+// enable API mocking in test runs using the same request handlers
+// as for the client-side mocking.
 beforeAll(() => server.listen())
 afterAll(() => server.close())
 afterEach(() => server.resetHandlers())
 
-test('calls fetch at the endpoint with the arguments for GET requests', async () => {
+test('makes GET requests to the given endpoint', async () => {
   const endpoint = 'test-endpoint'
   const mockResult = {mockValue: 'VALUE'}
   server.use(
@@ -18,15 +24,16 @@ test('calls fetch at the endpoint with the arguments for GET requests', async ()
   )
 
   const result = await client(endpoint)
+
   expect(result).toEqual(mockResult)
 })
 
 test('adds auth token when a token is provided', async () => {
-  const token = 'asdflaskjfadsfdfpoufsdpofsfsf'
-  const mockResult = {mockValue: 'VALUE'}
-  const endpoint = 'test-endpoint'
-  let request
+  const token = 'FAKE_TOKEN'
 
+  let request
+  const endpoint = 'test-endpoint'
+  const mockResult = {mockValue: 'VALUE'}
   server.use(
     rest.get(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
       request = req
@@ -36,29 +43,24 @@ test('adds auth token when a token is provided', async () => {
 
   await client(endpoint, {token})
 
-  expect(request.headers.get('Authorization')).toEqual(`Bearer ${token}`)
+  expect(request.headers.get('Authorization')).toBe(`Bearer ${token}`)
 })
 
 test('allows for config overrides', async () => {
-  const token = 'asdflaskjfadsfdfpoufsdpofsfsf'
-  const mockResult = {mockValue: 'VALUE'}
-  const endpoint = 'test-endpoint'
   let request
-  const customConfig = {
-    token,
-    mode: 'cors',
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'json',
-    },
-  }
-
+  const endpoint = 'test-endpoint'
+  const mockResult = {mockValue: 'VALUE'}
   server.use(
     rest.put(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
       request = req
       return res(ctx.json(mockResult))
     }),
   )
+
+  const customConfig = {
+    method: 'PUT',
+    headers: {'Content-Type': 'fake-type'},
+  }
 
   await client(endpoint, customConfig)
 
@@ -68,30 +70,31 @@ test('allows for config overrides', async () => {
 })
 
 test('when data is provided, it is stringified and the method defaults to POST', async () => {
-  const token = 'asdflaskjfadsfdfpoufsdpofsfsf'
-  // const mockResult = {mockValue: 'VALUE'}
-  const data = {name: 'Dan', age: 40}
   const endpoint = 'test-endpoint'
-  // let request
-  const customConfig = {
-    data,
-    token,
-    mode: 'cors',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'json',
-    },
-  }
-
   server.use(
     rest.post(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
-      // request = req
       return res(ctx.json(req.body))
     }),
   )
-
-  const result = await client(endpoint, customConfig)
+  const data = {a: 'b'}
+  const result = await client(endpoint, {data})
 
   expect(result).toEqual(data)
-  // expect(request.body).toEqual(data)
+})
+
+test('should automatically log out on 401 error', async () => {
+  const endpoint = 'test-endpoint'
+  const mockResult = {mockValue: 'VALUE'}
+  server.use(
+    rest.get(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+      return res(ctx.status(401), ctx.json(mockResult))
+    }),
+  )
+
+  const result = await client(endpoint).catch(e => e)
+
+  expect(result.message).toMatchInlineSnapshot(`"Please re-authenticate."`)
+
+  expect(queryCache.clear).toHaveBeenCalledTimes(1)
+  expect(auth.logout).toHaveBeenCalledTimes(1)
 })
