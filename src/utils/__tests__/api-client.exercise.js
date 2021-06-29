@@ -67,10 +67,31 @@ test('allows for config overrides', async () => {
   )
 })
 
-test('when data is provided, it is stringified and the method defaults to POST', async () => {})
-// 🐨 create a mock data object
-// 🐨 create a server handler very similar to the previous ones to handle the post request
-//    💰 Use rest.post instead of rest.get like we've been doing so far
-// 🐨 call client with an endpoint and an object with the data
-//    💰 client(endpoint, {data})
-// 🐨 verify the request.body is equal to the mock data object you passed
+test('when data is provided, it is stringified and the method defaults to POST', async () => {
+  const token = 'asdflaskjfadsfdfpoufsdpofsfsf'
+  // const mockResult = {mockValue: 'VALUE'}
+  const data = {name: 'Dan', age: 40}
+  const endpoint = 'test-endpoint'
+  // let request
+  const customConfig = {
+    data,
+    token,
+    mode: 'cors',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'json',
+    },
+  }
+
+  server.use(
+    rest.post(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+      // request = req
+      return res(ctx.json(req.body))
+    }),
+  )
+
+  const result = await client(endpoint, customConfig)
+
+  expect(result).toEqual(data)
+  // expect(request.body).toEqual(data)
+})
