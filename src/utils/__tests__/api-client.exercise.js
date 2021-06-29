@@ -21,10 +21,24 @@ test('calls fetch at the endpoint with the arguments for GET requests', async ()
   expect(result).toEqual(mockResult)
 })
 
-test('adds auth token when a token is provided', async () => {})
-// 🐨 create a fake token (it can be set to any string you want)
-// 🐨 create a "request" variable with let
-// 🐨 create a server handler to handle a test request you'll be making
+test('adds auth token when a token is provided', async () => {
+  const token = 'asdflaskjfadsfdfpoufsdpofsfsf'
+  const mockResult = {mockValue: 'VALUE'}
+  const endpoint = 'test-endpoint'
+  let request
+
+  server.use(
+    rest.get(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+      request = req
+      return res(ctx.json(mockResult))
+    }),
+  )
+
+  await client(endpoint, {token})
+
+  expect(request.headers.get('Authorization')).toEqual(`Bearer ${token}`)
+})
+
 // 🐨 inside the server handler, assign "request" to "req" so we can use that
 //     to assert things later.
 //     💰 so, something like...
