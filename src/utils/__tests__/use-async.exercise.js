@@ -74,12 +74,7 @@ test('calling run with a promise which resolves', async () => {
 })
 
 test('calling run with a promise which rejects', async () => {
-  // 🐨 this will be very similar to the previous test, except you'll reject the
-  // promise instead and assert on the error state.
-  // 💰 to avoid the promise actually failing your test, you can catch
-  //    the promise returned from `run` with `.catch(() => {})`
-
-  const {promise, resolve, reject} = deferred()
+  const {promise, reject} = deferred()
 
   const {result} = renderHook(() => useAsync())
 
@@ -104,14 +99,11 @@ test('calling run with a promise which rejects', async () => {
 
   expect(result.current.status).toEqual('pending')
 
-  // await act(async () => await resolve())
   const rejectedValue = Symbol('resolved value')
   await act(async () => {
     reject(rejectedValue)
     await p.catch(err => err)
   })
-
-  console.log('result.current', result.current)
 
   expect(result.current.isError).toBe(true)
   expect(result.current).toEqual({
@@ -133,8 +125,27 @@ test('calling run with a promise which rejects', async () => {
   expect(result.current.isIdle).toBe(true)
 })
 
-test('can specify an initial state', async () => {})
-// 💰 useAsync(customInitialState)
+test('can specify an initial state', async () => {
+  const initialState = {
+    status: 'resolved',
+    data: {name: 'Daniel'},
+  }
+  const {result} = renderHook(() => useAsync(initialState))
+
+  expect(result.current).toEqual({
+    isIdle: false,
+    isLoading: false,
+    isError: false,
+    isSuccess: true,
+    setData: expect.any(Function),
+    setError: expect.any(Function),
+    error: null,
+    status: initialState.status,
+    data: initialState.data,
+    run: expect.any(Function),
+    reset: expect.any(Function),
+  })
+})
 
 test('can set the data', async () => {})
 // 💰 result.current.setData('whatever you want')
