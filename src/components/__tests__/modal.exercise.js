@@ -1,39 +1,32 @@
-import React from 'react'
-import {Modal, ModalContents, ModalOpenButton} from '../modal'
+import * as React from 'react'
 import {render, screen, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import {Modal, ModalOpenButton, ModalContents} from '../modal'
 
 test('can be opened and closed', () => {
-  const label = 'Login form'
-  const title = 'Login'
-  const content = 'Modal contents'
+  const label = 'Modal Label'
+  const title = 'Modal Title'
+  const content = 'Modal content'
+
   render(
     <Modal>
       <ModalOpenButton>
-        <button>Login</button>
+        <button>Open</button>
       </ModalOpenButton>
       <ModalContents aria-label={label} title={title}>
-        {content}
+        <div>{content}</div>
       </ModalContents>
     </Modal>,
   )
-
-  const openButton = screen.getByRole('button', {name: /login/i})
-  userEvent.click(openButton)
+  userEvent.click(screen.getByRole('button', {name: /open/i}))
 
   const modal = screen.getByRole('dialog')
   expect(modal).toHaveAttribute('aria-label', label)
-  // scope queries to just the dialog
   const inModal = within(modal)
   expect(inModal.getByRole('heading', {name: title})).toBeInTheDocument()
   expect(inModal.getByText(content)).toBeInTheDocument()
 
-  // expect(queryByText(/modal contents/i))
-
-  // const closeButton = screen.getByRole('button', {name: /close/i})
-  const closeButton = inModal.getByRole('button', {name: /close/i})
-
-  userEvent.click(closeButton)
+  userEvent.click(inModal.getByRole('button', {name: /close/i}))
 
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 })
