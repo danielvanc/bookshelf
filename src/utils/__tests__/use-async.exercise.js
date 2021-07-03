@@ -147,11 +147,53 @@ test('can specify an initial state', async () => {
   })
 })
 
-test('can set the data', async () => {})
-// 💰 result.current.setData('whatever you want')
+test('can set the data', async () => {
+  const {result} = renderHook(() => useAsync())
+  const newData = {age: 40}
+  act(() => {
+    result.current.setData(newData)
+  })
 
-test('can set the error', async () => {})
-// 💰 result.current.setError('whatever you want')
+  expect(result.current.data).toEqual(newData)
+
+  expect(result.current).toEqual({
+    isIdle: false,
+    isLoading: false,
+    isError: false,
+    isSuccess: true,
+    setData: expect.any(Function),
+    setError: expect.any(Function),
+    error: null,
+    status: 'resolved',
+    data: newData,
+    run: expect.any(Function),
+    reset: expect.any(Function),
+  })
+})
+
+test('can set the error', async () => {
+  const {result} = renderHook(() => useAsync())
+  const newData = 'rejected'
+  act(() => {
+    result.current.setError('rejected')
+  })
+
+  expect(result.current.error).toEqual(newData)
+
+  expect(result.current).toEqual({
+    isIdle: false,
+    isLoading: false,
+    isError: true,
+    isSuccess: false,
+    setData: expect.any(Function),
+    setError: expect.any(Function),
+    error: newData,
+    status: 'rejected',
+    data: null,
+    run: expect.any(Function),
+    reset: expect.any(Function),
+  })
+})
 
 test('No state updates happen if the component is unmounted while pending', async () => {})
 // 💰 const {result, unmount} = renderHook(...)
