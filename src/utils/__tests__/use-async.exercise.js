@@ -1,8 +1,15 @@
 import {renderHook, act} from '@testing-library/react-hooks'
 import {useAsync} from '../hooks'
 
-// 💰 This is a way you can create a promise
-// which you can imperatively resolve or reject whenever you want.
+beforeEach(() => {
+  jest.spyOn(console, 'error')
+})
+
+afterEach(() => {
+  // Reset console.error to it's original implementation
+  console.error.mockRestore()
+})
+
 function deferred() {
   let resolve, reject
   const promise = new Promise((res, rej) => {
@@ -11,14 +18,6 @@ function deferred() {
   })
   return {promise, resolve, reject}
 }
-
-// Usage:
-// const {promise, resolve} = deferred()
-// promise.then(() => console.log('resolved'))
-// do stuff/make assertions you want to before calling resolve
-// resolve()
-// await promise
-// do stuff/make assertions you want to after the promise has resolved
 
 test('calling run with a promise which resolves', async () => {
   const {promise, resolve} = deferred()
@@ -195,8 +194,23 @@ test('can set the error', async () => {
   })
 })
 
-test('No state updates happen if the component is unmounted while pending', async () => {})
-// 💰 const {result, unmount} = renderHook(...)
-// 🐨 ensure that console.error is not called (React will call console.error if updates happen when unmounted)
+test('No state updates happen if the component is unmounted while pending', async () => {
+  const {promise, resolve} = deferred()
+  const {result, unmount} = renderHook(() => useAsync())
+
+  let p
+  act(() => {
+    p = result.current.run(promise)
+  })
+
+  unmount()
+
+  await act(async () => {
+    resolve()
+    await p
+  })
+
+  expect(console.error).not.toHaveBeenCalled()
+})
 
 test('calling "run" without a promise results in an early error', async () => {})
