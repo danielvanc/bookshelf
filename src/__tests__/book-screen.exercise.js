@@ -1,6 +1,11 @@
 // 🐨 here are the things you're going to need for this test:
 import * as React from 'react'
-import {render, screen, waitFor} from '@testing-library/react'
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react'
 import {queryCache} from 'react-query'
 import {buildUser, buildBook} from 'test/generate'
 import * as auth from 'auth-provider'
@@ -48,11 +53,7 @@ test('renders all the book information', async () => {
   // indicators to go away
   // 📜 https://testing-library.com/docs/dom-testing-library/api-async#waitfor
   // 💰 if (queryCache.isFetching or there are loading indicators) then throw an error...
-  // await waitFor(() => {
-  //   if (queryCache.isFetching) {
-  //     console.log('loading...')
-  //   }
-  // })
+  await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
 
   // 🐨 assert the book's info is in the document
   screen.debug()
