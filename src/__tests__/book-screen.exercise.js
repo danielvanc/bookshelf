@@ -1,4 +1,3 @@
-// 🐨 here are the things you're going to need for this test:
 import * as React from 'react'
 import {
   render,
@@ -13,14 +12,14 @@ import {AppProviders} from 'context'
 import {App} from 'app'
 
 // 🐨 after each test, clear the queryCache and auth.logout
-// afterEach(() => {
-//   queryCache.clear()
-//   auth.logout()
-// })
+afterEach(() => {
+  queryCache.clear()
+  auth.logout()
+})
 
 test('renders all the book information', async () => {
   // 🐨 "authenticate" the client by setting the auth.localStorageKey in localStorage to some string value (can be anything for now)
-  // window.localStorage.setItem(auth.localStorageKey, 'TEST_AUTH')
+  window.localStorage.setItem(auth.localStorageKey, 'TEST_AUTH_2')
 
   // 🐨 create a user using `buildUser`
   // const user = buildUser()
@@ -39,10 +38,16 @@ test('renders all the book information', async () => {
   // 💰 window.fetch = async (url, config) => { /* handle stuff here*/ }
   // 💰 return Promise.resolve({ok: true, json: async () => ({ /* response data here */ })})
 
-  // window.fetch = async (url, config) => {
-  //   console.warn(url, config)
-  //   return Promise.reject(new Error(`NEED TO HANDLE: ${url}`))
-  // }
+  const originalFetch = window.fetch
+  window.fetch = async (url, config) => {
+    if (url.endsWith('/bootstrap')) {
+      return {
+        ok: true,
+        json: async () => ({user: {username: 'bob'}, listItems: []}),
+      }
+    }
+    return originalFetch(url, config)
+  }
 
   // 🐨 render the App component and set the wrapper to the AppProviders
 
