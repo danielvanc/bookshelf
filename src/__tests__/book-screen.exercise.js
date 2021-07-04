@@ -1,51 +1,43 @@
 import * as React from 'react'
 import {render, screen, waitForElementToBeRemoved} from '@testing-library/react'
 import {queryCache} from 'react-query'
-import {buildUser, buildBook} from 'test/generate'
 import * as auth from 'auth-provider'
+import {server} from 'test/server'
+import * as booksDB from 'test/data/books'
+import * as usersDB from 'test/data/users'
+import * as listItemsDB from 'test/data/list-items'
+import {buildUser, buildBook} from 'test/generate'
 import {AppProviders} from 'context'
 import {App} from 'app'
 
-// 🐨 after each test, clear the queryCache and auth.logout
+// general cleanup
 afterEach(async () => {
   queryCache.clear()
-  await auth.logout()
+  await Promise.all([
+    auth.logout(),
+    usersDB.reset(),
+    booksDB.reset(),
+    listItemsDB.reset(),
+  ])
 })
 
 test('renders all the book information', async () => {
-  window.localStorage.setItem(auth.localStorageKey, 'TEST_AUTH_2')
-
   const user = buildUser()
-  const book = buildBook()
-  const URL = `/book/${book.id}`
-  window.history.pushState({}, 'page title', URL)
+  await usersDB.create(user)
+  const authUser = await usersDB.authenticate(user)
 
-  // - url ends with `/list-items`: respond with {listItems: []}
+  window.localStorage.setItem(auth.localStorageKey, authUser.token)
 
-  const originalFetch = window.fetch
-  window.fetch = async (url, config) => {
-    if (url.endsWith('/bootstrap')) {
-      return {
-        ok: true,
-        json: async () => ({
-          user: {...user, token: 'TEST_AUTH_2'},
-          listItems: [],
-        }),
-      }
-    } else if (url.endsWith(`/books/${book.id}`)) {
-      return {
-        ok: true,
-        json: async () => ({book}),
-      }
-    }
-    return originalFetch(url, config)
-  }
+  const book = await booksDB.create(buildBook())
+  const route = `/book/${book.id}`
+  window.history.pushState({}, 'Test page', route)
 
   render(<App />, {wrapper: AppProviders})
 
-  await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
-
-  // screen.debug()
+  await waitForElementToBeRemoved(() => [
+    ...screen.queryAllByLabelText(/loading/i),
+    ...screen.queryAllByText(/loading/i),
+  ])
 
   expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument()
   expect(screen.getByText(book.author)).toBeInTheDocument()
@@ -56,6 +48,7 @@ test('renders all the book information', async () => {
     book.coverImageUrl,
   )
   expect(screen.getByRole('button', {name: /add to list/i})).toBeInTheDocument()
+
   expect(
     screen.queryByRole('button', {name: /remove from list/i}),
   ).not.toBeInTheDocument()
@@ -66,7 +59,7 @@ test('renders all the book information', async () => {
     screen.queryByRole('button', {name: /mark as unread/i}),
   ).not.toBeInTheDocument()
   expect(
-    screen.queryByRole('textarea', {name: /notes/i}),
+    screen.queryByRole('textbox', {name: /notes/i}),
   ).not.toBeInTheDocument()
   expect(screen.queryByRole('radio', {name: /star/i})).not.toBeInTheDocument()
   expect(screen.queryByLabelText(/start date/i)).not.toBeInTheDocument()
