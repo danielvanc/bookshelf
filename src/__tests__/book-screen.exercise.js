@@ -1,10 +1,5 @@
 import * as React from 'react'
-import {
-  render,
-  screen,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react'
+import {render, screen, waitForElementToBeRemoved} from '@testing-library/react'
 import {queryCache} from 'react-query'
 import {buildUser, buildBook} from 'test/generate'
 import * as auth from 'auth-provider'
@@ -12,9 +7,9 @@ import {AppProviders} from 'context'
 import {App} from 'app'
 
 // 🐨 after each test, clear the queryCache and auth.logout
-afterEach(() => {
+afterEach(async () => {
   queryCache.clear()
-  auth.logout()
+  await auth.logout()
 })
 
 test('renders all the book information', async () => {
