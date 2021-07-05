@@ -5,9 +5,9 @@ import {
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {AppProviders} from 'context'
-import * as usersDB from 'test/data/users'
 import * as auth from 'auth-provider'
-import {buildUser} from 'test/generate'
+import {buildUser} from './generate'
+import * as usersDB from './data/users'
 
 async function render(ui, {route = '/list', user, ...renderOptions} = {}) {
   // if you want to render the app unauthenticated then pass "null" as the user
@@ -39,4 +39,4 @@ const waitForLoadingToFinish = () =>
   ])
 
 export * from '@testing-library/react'
-export {render, loginAsUser, waitForLoadingToFinish, userEvent}
+export {render, userEvent, loginAsUser, waitForLoadingToFinish}
