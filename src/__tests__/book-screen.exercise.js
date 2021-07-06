@@ -149,6 +149,7 @@ test('can mark a list item as read', async () => {
 })
 
 test('can edit a note', async () => {
+  jest.useFakeTimers()
   const user = await loginAsUser()
   const book = await booksDB.create(buildBook())
   const route = `/book/${book.id}`
