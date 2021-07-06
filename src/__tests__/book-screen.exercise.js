@@ -176,5 +176,5 @@ test('can edit a note', async () => {
     notes: newNotes,
   })
 
-  screen.debug()
+  // screen.debug()
 })
