@@ -6,12 +6,15 @@ import {
   userEvent,
   loginAsUser,
 } from 'test/app-test-utils'
+import {server, rest} from 'test/server'
 import faker from 'faker'
 import {buildBook, buildListItem} from 'test/generate'
 import * as booksDB from 'test/data/books'
 import * as listItemsDB from 'test/data/list-items'
 import {formatDate} from 'utils/misc'
 import {App} from 'app'
+
+const apiURL = process.env.REACT_APP_API_URL
 
 async function renderBookScreen({user, book, listItem} = {}) {
   if (user === undefined) {
@@ -179,5 +182,38 @@ describe('console errors', () => {
     ).toMatchInlineSnapshot(`"There was an error: Book not found"`)
   })
 
-  test('note update failures are displayed', () => {})
+  test('note update failures are displayed', async () => {
+    // using fake timers to skip debounce time
+    jest.useFakeTimers()
+    const {listItem} = await renderBookScreen()
+
+    const newNotes = faker.lorem.words()
+    const notesTextarea = screen.getByRole('textbox', {name: /notes/i})
+    const testErrorMessage = '__test_error_message__'
+
+    server.use(
+      rest.put(`${apiURL}/list-items/:listItemId`, async (req, res, ctx) => {
+        return res(
+          ctx.status(400),
+          ctx.json({status: 400, message: testErrorMessage}),
+        )
+      }),
+    )
+
+    userEvent.clear(notesTextarea)
+    userEvent.type(notesTextarea, newNotes)
+
+    // wait for the loading spinner to show up
+    await screen.findByLabelText(/loading/i)
+    // wait for the loading spinner to go away
+    await waitForLoadingToFinish()
+
+    expect((await screen.getByRole('alert')).textContent).toMatchInlineSnapshot(
+      `"There was an error: __test_error_message__"`,
+    )
+
+    expect(await listItemsDB.read(listItem.id)).not.toMatchObject({
+      notes: newNotes,
+    })
+  })
 })
