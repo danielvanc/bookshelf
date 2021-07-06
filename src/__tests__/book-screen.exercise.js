@@ -1,4 +1,5 @@
 import * as React from 'react'
+import faker from 'faker'
 import {
   render,
   screen,
@@ -147,4 +148,32 @@ test('can mark a list item as read', async () => {
   ).not.toBeInTheDocument()
 })
 
-test('can edit a note', () => {})
+test('can edit a note', async () => {
+  const user = await loginAsUser()
+  const book = await booksDB.create(buildBook())
+  const route = `/book/${book.id}`
+  const listItem = await listItemsDB.create(buildListItem({owner: user, book}))
+
+  await render(<App />, {route, user})
+
+  const newNotes = faker.lorem.words()
+  const notesTextArea = screen.getByRole('textbox', {name: /notes/i})
+
+  userEvent.clear(notesTextArea)
+  userEvent.type(notesTextArea, newNotes)
+
+  await screen.findByLabelText(/loading/i)
+
+  await waitForLoadingToFinish()
+
+  expect(notesTextArea).toHaveValue(newNotes)
+
+  // because of no way to know from the ui if was
+  // successful to assert on, we can see if the listItem
+  // was saved to the db
+  expect(await listItemsDB.read(listItem.id)).toMatchObject({
+    notes: newNotes,
+  })
+
+  screen.debug()
+})
