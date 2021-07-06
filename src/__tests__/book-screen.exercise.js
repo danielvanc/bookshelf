@@ -14,17 +14,25 @@ import {formatDate} from 'utils/misc'
 import {App} from 'app'
 
 async function renderBookScreen({user, book, listItem} = {}) {
-  if (user === undefined) user = await loginAsUser()
-
-  if (book === undefined) book = await booksDB.create(buildBook())
+  if (user === undefined) {
+    user = await loginAsUser()
+  }
+  if (book === undefined) {
+    book = await booksDB.create(buildBook())
+  }
   if (listItem === undefined) {
     listItem = await listItemsDB.create(buildListItem({owner: user, book}))
   }
   const route = `/book/${book.id}`
 
-  const utils = await render(<App />, {route, user})
+  const utils = await render(<App />, {user, route})
 
-  return {...utils, user, book, listItem}
+  return {
+    ...utils,
+    book,
+    user,
+    listItem,
+  }
 }
 
 test('renders all the book information', async () => {
@@ -105,6 +113,8 @@ test('can remove a list item for the book', async () => {
 
 test('can mark a list item as read', async () => {
   const {listItem} = await renderBookScreen()
+
+  // set the listItem to be unread in the DB
   await listItemsDB.update(listItem.id, {finishDate: null})
 
   const markAsReadButton = screen.getByRole('button', {name: /mark as read/i})
@@ -150,3 +160,14 @@ test('can edit a note', async () => {
     notes: newNotes,
   })
 })
+
+test('shows an error message when the book fails to load', async () => {
+  const book = {id: 'BAD_ID'}
+  await renderBookScreen({listItem: null, book})
+
+  expect((await screen.findByRole('alert')).textContent).toMatchInlineSnapshot(
+    `"There was an error: Book not found"`,
+  )
+})
+
+test('note update failures are displayed', () => {})
