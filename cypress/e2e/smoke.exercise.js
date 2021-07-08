@@ -59,19 +59,29 @@ describe('smoke', () => {
     // and *then* wait for it to go away.
     // 🐨 wait for the loading spinner to show up (💰 .should('exist'))
     // 🐨 wait for the loading spinner to go away (💰 .should('not.exist'))
-    //
-    // 🐨 mark the book as read
-    //
-    // the radio buttons are fancy and the inputs themselves are visually hidden
-    // in favor of nice looking stars, so we have to the force option to click.
-    // 📜 https://docs.cypress.io/api/commands/click.html#Arguments
-    // 🐨 click the 5 star rating radio button
-    //
-    // 🐨 navigate to the finished books page
-    //
-    // 🐨 make sure there's only one listitem here (within "main")
-    // 🐨 make sure the 5 star rating radio button is checked
-    // 🐨 click the link for your book to go to the books page again
+
+    cy.findByRole('main').within(() => {
+      cy.findByRole('textbox', {name: /notes/i}).type('This is an awesome book')
+      cy.findByLabelText(/loading/i).should('exist')
+      cy.findByLabelText(/loading/i).should('not.exist')
+      cy.findByRole('button', {name: /mark as read/i}).click()
+      cy.findByRole('radio', {name: /5 stars/i}).click({
+        force: true,
+      })
+      // Add force true if sometimes the thing you want to
+      // click on is not visible
+    })
+
+    cy.findByRole('navigation').within(() => {
+      cy.findByRole('link', {name: /finished books/i}).click()
+    })
+
+    cy.findByRole('main').within(() => {
+      cy.findAllByRole('listitem').should('have.length', 1)
+      cy.findByRole('radio', {name: /5 stars/i}).should('be.checked')
+      cy.findByRole('link', {name: /to kill a mockingbird/i}).click()
+    })
+
     //
     // 🐨 remove the book from the list
     // 🐨 ensure the notes textbox and the rating radio buttons are gone
